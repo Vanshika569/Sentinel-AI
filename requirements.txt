@@ -1,0 +1,15 @@
+fastapi 
+uvicorn 
+streamlit 
+langchain 
+langgraph 
+langchain-google-genai 
+langchain-community 
+langchain-chroma 
+langchain-huggingface 
+chromadb 
+sentence-transformers 
+psutil 
+python-dotenv 
+pydantic 
+sqlalchemy
