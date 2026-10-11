@@ -1,0 +1,31 @@
+INCIDENT: High CPU Usage
+
+DESCRIPTION:
+High CPU usage occurs when a system's processor is
+handling more work than expected.
+
+POSSIBLE CAUSES:
+1. Too many running processes.
+2. A process consuming excessive CPU resources.
+3. Infinite loops or inefficient application code.
+4. Heavy workloads running simultaneously.
+5. Background tasks consuming processor resources.
+
+INVESTIGATION STEPS:
+1. Check the current CPU utilization.
+2. Identify processes consuming the most CPU.
+3. Inspect application logs for errors.
+4. Check whether resource usage increases over time.
+5. Review recent application or configuration changes.
+
+SAFE RECOMMENDATIONS:
+1. Investigate the processes consuming excessive CPU.
+2. Optimize inefficient application code if identified.
+3. Reschedule nonessential resource-intensive tasks.
+4. Restart a service only after evaluating the impact
+   and obtaining the necessary approval.
+
+IMPORTANT:
+Do not terminate processes or restart services
+automatically without appropriate authorization.
+Investigate the evidence before deciding on a fix.

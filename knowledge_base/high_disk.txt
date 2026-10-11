@@ -1,0 +1,29 @@
+INCIDENT: High Disk Usage
+
+DESCRIPTION:
+High disk usage occurs when storage space becomes
+limited or disk capacity approaches its maximum.
+
+POSSIBLE CAUSES:
+1. Large log files.
+2. Temporary files accumulating over time.
+3. Large application data files.
+4. Unnecessary backups.
+5. Rapid growth in application-generated data.
+
+INVESTIGATION STEPS:
+1. Check available disk space.
+2. Identify directories consuming significant storage.
+3. Inspect log files for unexpected growth.
+4. Check temporary files and backup locations.
+5. Review recent changes in storage consumption.
+
+SAFE RECOMMENDATIONS:
+1. Identify unnecessary files before removing anything.
+2. Configure appropriate log rotation.
+3. Review backup retention policies.
+4. Expand storage if required and feasible.
+
+IMPORTANT:
+Never delete files automatically without authorization.
+Verify that files are safe to remove before cleanup.

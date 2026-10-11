@@ -1,0 +1,30 @@
+INCIDENT: High Memory Usage
+
+DESCRIPTION:
+High memory usage occurs when applications and
+processes consume a large portion of available RAM.
+
+POSSIBLE CAUSES:
+1. Too many applications running simultaneously.
+2. Memory leaks in an application.
+3. Large datasets loaded into memory.
+4. Inefficient memory management.
+5. Background processes consuming excessive RAM.
+
+INVESTIGATION STEPS:
+1. Check current memory utilization.
+2. Identify processes using the most memory.
+3. Inspect application logs for memory-related errors.
+4. Check whether memory usage continuously increases.
+5. Review recent application changes.
+
+SAFE RECOMMENDATIONS:
+1. Investigate processes consuming excessive memory.
+2. Optimize memory-intensive application operations.
+3. Investigate potential memory leaks.
+4. Consider restarting an affected service only after
+   assessing the impact and obtaining approval.
+
+IMPORTANT:
+Do not terminate processes automatically.
+Verify the evidence before recommending a fix.

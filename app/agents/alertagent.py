@@ -1,4 +1,4 @@
-from app.models.inciddent import Incident
+from app.models.incident import Incident
 class AlertAgent:
     def execute(self,metrices):
         problems = []
