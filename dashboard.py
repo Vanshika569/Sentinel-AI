@@ -304,6 +304,32 @@ def try_get_runbook(problems):
     return None
 
 
+def run_sentinelai_agents():
+    """Run the existing project pipeline on demand from the dashboard.
+
+    The Gemini call is isolated so a temporary API failure does not hide the
+    incident details or the recovery agent's rule-based recommendations.
+    """
+    from app.services.system_monitor import System_monitor
+    from app.agents.alertagent import AlertAgent
+    from app.agents.diagnosis_agent import DiagnosisAgent
+    from app.agents.recovery_agent import RecoveryAgent
+
+    monitor = System_monitor()
+    monitored_metrics = monitor.get_metrices()
+    incident = AlertAgent().execute(monitored_metrics)
+
+    diagnosis = None
+    diagnosis_error = None
+    try:
+        diagnosis = DiagnosisAgent().execute(incident)
+    except Exception as exc:
+        diagnosis_error = str(exc)
+
+    recommendations = RecoveryAgent().execute(incident)
+    return incident, diagnosis, diagnosis_error, recommendations
+
+
 def status_color(severity):
     return {"HEALTHY": "healthy", "WARNING": "warning", "CRITICAL": "critical"}.get(severity, "healthy")
 
@@ -479,19 +505,78 @@ if page == "Overview":
 
 elif page == "Incident analysis":
     st.markdown(
-        '<div class="panel"><div class="panel-title">🚨 Incident analysis</div><div class="panel-desc">Review current host signals and prepare a triage summary.</div>',
+        '<div class="panel"><div class="panel-title">🚨 Incident analysis</div>'
+        '<div class="panel-desc">Run the existing SentinelAI monitoring, alert, AI diagnosis, and recovery agents on demand.</div>',
         unsafe_allow_html=True,
     )
-    st.markdown(f"**Current severity:** `{severity}`")
+    st.markdown(f"**Live dashboard severity:** `{severity}`")
     if problems:
         for problem in problems:
             st.markdown(f"- {problem}")
     else:
-        st.success("No CPU, memory, or disk threshold breach is currently detected.")
-    st.markdown("#### Triage recommendations")
-    for idx, recommendation in enumerate(recommendations, start=1):
-        st.markdown(f"{idx}. {recommendation}")
-    st.caption("Diagnosis in this dashboard currently uses transparent threshold rules. Gemini diagnosis is not invoked from this page yet.")
+        st.success("No CPU, memory, or disk threshold breach is currently detected by the dashboard rules.")
+
+    st.markdown("#### Run the SentinelAI agent workflow")
+    st.caption(
+        "This button calls the project's System_monitor → AlertAgent → DiagnosisAgent → RecoveryAgent pipeline. "
+        "Gemini diagnosis requires a valid API key and network access."
+    )
+    if st.button("▶  Run AI Incident Analysis", key="run_ai_incident_analysis", use_container_width=True):
+        with st.spinner("Collecting metrics and running SentinelAI agents…"):
+            try:
+                incident, diagnosis, diagnosis_error, agent_recommendations = run_sentinelai_agents()
+                st.session_state["sentinelai_analysis"] = {
+                    "severity": getattr(incident, "severity", "UNKNOWN"),
+                    "problems": list(getattr(incident, "problems", []) or []),
+                    "diagnosis": diagnosis,
+                    "diagnosis_error": diagnosis_error,
+                    "recommendations": list(agent_recommendations or []),
+                    "run_at": datetime.now().astimezone().strftime("%d %b %Y, %H:%M:%S %Z"),
+                }
+            except Exception as exc:
+                st.session_state["sentinelai_analysis_error"] = str(exc)
+                st.session_state.pop("sentinelai_analysis", None)
+            else:
+                st.session_state.pop("sentinelai_analysis_error", None)
+
+    if st.session_state.get("sentinelai_analysis_error"):
+        st.error("SentinelAI could not complete the agent workflow. Check the terminal for details.")
+        st.code(st.session_state["sentinelai_analysis_error"])
+
+    analysis = st.session_state.get("sentinelai_analysis")
+    if analysis:
+        st.markdown("---")
+        st.markdown(f"**Agent incident severity:** `{analysis['severity']}`")
+        st.caption(f"Analysis run: {analysis['run_at']}")
+
+        st.markdown("#### Detected problems")
+        if analysis["problems"]:
+            for problem in analysis["problems"]:
+                st.markdown(f"- {problem}")
+        else:
+            st.success("The Alert Agent did not identify a threshold-based problem.")
+
+        st.markdown("#### AI diagnosis")
+        if analysis["diagnosis"]:
+            st.markdown(analysis["diagnosis"])
+        elif analysis["diagnosis_error"]:
+            st.warning("The incident and recovery results are available, but Gemini diagnosis failed for this run.")
+            st.caption("This can happen if the API is temporarily unavailable, the API key is missing/invalid, or the network request fails.")
+            with st.expander("Technical error details"):
+                st.code(analysis["diagnosis_error"])
+        else:
+            st.info("No AI diagnosis was needed or returned for this incident.")
+
+        st.markdown("#### Recovery recommendations")
+        if analysis["recommendations"]:
+            for idx, recommendation in enumerate(analysis["recommendations"], start=1):
+                st.markdown(f"{idx}. {recommendation}")
+        else:
+            st.info("The Recovery Agent did not return any recommendations for this incident.")
+        st.caption("Recommendations are advisory only. SentinelAI does not automatically execute remediation actions.")
+    else:
+        st.info("Select **Run AI Incident Analysis** to execute the agents and display their results here.")
+
     st.markdown("</div>", unsafe_allow_html=True)
 
 elif page == "Runbook guidance":
