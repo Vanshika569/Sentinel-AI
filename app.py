@@ -17,7 +17,18 @@ recovery_agent  = RecoveryAgent()
 diagnosis = diagnosis_agent.execute(incident)
 recommendations = recovery_agent.execute(incident)
 
-print("\nRecovery Recommendations:")
+print("\n========== SENTINELAI INCIDENT REPORT ==========")
 
+print("\nIncident Severity:")
+print(incident.severity)
+
+print("\nDetected Problems:")
+for problem in incident.problems:
+    print("-", problem)
+
+print("\n========== AI DIAGNOSIS ==========")
+print(diagnosis)
+
+print("\n========== RECOVERY RECOMMENDATIONS ==========")
 for recommendation in recommendations:
     print("-", recommendation)
